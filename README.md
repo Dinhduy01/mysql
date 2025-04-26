@@ -1,18 +1,56 @@
-# MySQL on Render
+# MySQL Tutor Database on Render
 
-This is a template repository for running [MySQL](https://www.mysql.com) on Render. 
+This repository contains a MySQL database for a tutoring application that can be deployed on Render.
 
-* It uses the [official](https://hub.docker.com/r/mysql/mysql-server) MySQL Docker image.
+* Uses MySQL 8.0.24 via the [official MySQL Docker image](https://hub.docker.com/r/mysql/mysql-server)
+* Configured with [Render Disks](https://render.com/docs/disks) for fast, persistent SSD storage
+* Runs in a [private network](https://render.com/docs/private-services) for security
 
-* [Render Disks](https://render.com/docs/disks) provide fast, persistent SSD storage for your database.
+## Database Structure
 
-* MySQL runs in your [private network](https://render.com/docs/private-services) and isn't exposed to the public Internet.
+This MySQL instance contains a tutoring application database with tables for:
+- Users and authentication
+- Classes and enrollment
+- Blogs and comments
+- Assignments and submissions
+- Feedback and communication
 
-## MySQL Versions
-The `master` branch runs MySQL 8. You can use the `mysql-5` branch to run MySQL 5 instead.
+## Deployment Instructions
 
-## Deployment
+1. Fork this repository to your GitHub account
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Create a new "Blueprint" instance
+4. Connect your GitHub account and select this repository
+5. Render will automatically deploy the MySQL database using the settings in `render.yaml`
+6. The database will be accessible via the internal URL `mysql:3306` to other services on your Render account
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/render-examples/mysql)
+## Connection Details
 
-See https://render.com/docs/deploy-mysql.
+After deployment, you can find connection credentials in the Render dashboard:
+- **Host**: Internal service name `mysql`
+- **Port**: 3306
+- **Database**: `mysql` (also creates `tutordb` for application data)
+- **Username**: `mysql`
+- **Password**: Auto-generated (check environment variables in Render dashboard)
+
+## Connect from Another Render Service
+
+Add the following environment variables to your application service:
+```
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=tutordb
+DB_USERNAME=mysql
+DB_PASSWORD=$MYSQL_PASSWORD
+```
+
+Link your application service to the MySQL service in Render to share the environment variables.
+
+## Local Development
+
+To run this database locally for development:
+
+```bash
+docker build -t mysql-tutordb .
+docker run -p 3306:3306 -v mysql-data:/var/lib/mysql mysql-tutordb
+```
